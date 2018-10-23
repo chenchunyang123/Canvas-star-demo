@@ -95,3 +95,15 @@ var timer = setInterval(function() {
     },20);
 ```
 里面的line是封装的连线方法。
+#### 第五步：加了一个鼠标点击效果
+>鼠标点击的时候，在鼠标的位置向四面八方发射5颗星星，也就是继续向数组中添加5颗星星，但是不能光创建，随着点击次数越来越多，容易卡死，所以当创建的时候，移除掉相应个数的星星。
+```
+document.onmousedown = function(e) {
+        var mouse_x = e.clientX;
+        var mouse_y = e.clientY;
+        for(var i = 0; i < 5; i++) {
+            arr.push(new Star(ctx, mouse_x, mouse_y, 1));
+            arr.shift();
+        }
+    }
+```
