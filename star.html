@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        canvas {
+            background-image: url(imgs/sf.jpg);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="myCanvas"></canvas>
+<script>
+    var width = document.documentElement.clientWidth;
+    var height = document.documentElement.clientHeight;
+    var canvas = document.getElementById("myCanvas");
+    var ctx = canvas.getContext("2d");
+    // 设置宽高
+    canvas.width = width;
+    canvas.height = height;
+    // 改变填充色
+	ctx.fillStyle = "white";
+	// 改变线条颜色
+	ctx.strokeStyle = "rgba(255, 255, 123, .5)";
+	// 改变线宽
+	ctx.lineWidth = ".3";
+
+
+
+    // 定义星星类
+    function Star(ctx,x,y,r) {
+        this.ctx = ctx;
+        this.x = x;
+        this.y = y;
+        this.r = r;
+        this.x_speed = (parseInt(Math.random()* 3) + 1) * Math.pow(-1,parseInt(Math.random()* 10) + 1)/5;
+        this.y_speed = (parseInt(Math.random()* 3) + 1) * Math.pow(-1,parseInt(Math.random()* 10) + 1)/5;
+    }
+
+    // 移动方法
+    Star.prototype.move = function() {
+        this.x += this.x_speed;
+        this.y += this.y_speed;
+    }
+    // 渲染方法
+    Star.prototype.render = function() {
+        this.ctx.beginPath();
+        this.ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+        this.ctx.closePath();
+        this.ctx.fill();
+    }
+    // 边界判断
+    Star.prototype.changeX = function() {
+        this.x_speed = -this.x_speed;
+    }
+    Star.prototype.changeY = function() {
+        this.y_speed = -this.y_speed;
+    }
+
+    // 创建100个星星
+    var arr = [];
+    for(var i = 0; i < 100; i++) {
+        arr.push(new Star(ctx, Math.random() * width, Math.random() * height, 1));
+    }
+
+
+    // 在鼠标位置创建星星
+    var mouse_star = new Star(ctx, 0, 0, 2);
+    document.onmousemove = function(e) {
+        var mouse_x = e.clientX;
+        var mouse_y = e.clientY;
+        mouse_star.x = mouse_x;
+        mouse_star.y = mouse_y;
+    }
+
+    // 添加鼠标点击事件
+    document.onmousedown = function(e) {
+        var mouse_x = e.clientX;
+        var mouse_y = e.clientY;
+        for(var i = 0; i < 5; i++) {
+            arr.push(new Star(ctx, mouse_x, mouse_y, 1));
+            arr.shift();
+        }
+    }
+
+
+    // 开启定时器
+    var timer = setInterval(function() {
+        // 清屏
+        ctx.clearRect(0, 0, width, height);
+        // 渲染鼠标星星
+        mouse_star.render();
+
+        arr.forEach(function(value,index) {
+            value.move();
+            // 判断边界
+            if (value.x < 0 || value.x > width) {
+                value.changeX();
+            }
+            if (value.y < 0 || value.y > height) {
+                value.changeY();
+            }
+            value.render();
+        })
+        arr.forEach(function(value,index) {
+                for(var i = index + 1; i < arr.length; i++) {
+                    if(Math.abs(value.x - arr[i].x) < 50 && Math.abs(value.y - arr[i].y) < 50) {
+                        // console.log(1)
+                        line(value.x, value.y, arr[i].x, arr[i].y);
+                    }
+                }
+                // 判断星星与其它所有星星之间的关系
+                if (Math.abs(value.x - mouse_star.x) < 150 && Math.abs(value.y - mouse_star.y) < 150) {
+                    // 连线
+                    line(value.x, value.y, mouse_star.x, mouse_star.y);
+                }
+            }
+        )
+    },20);
+    
+
+
+    // 封装函数，传递两个点，绘制两个点之间的线段
+    function line(x1, y1, x2, y2) {
+            // 开启路径
+            ctx.beginPath();
+            // 移动画笔到某个位置
+            ctx.moveTo(x1, y1);
+            // 绘制路径
+            ctx.lineTo(x2, y2);
+            // 关闭路径
+            ctx.closePath();
+            // 描边
+            ctx.stroke();
+        }
+</script>
+</body>
+</html>
